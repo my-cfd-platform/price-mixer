@@ -1,0 +1,23 @@
+use my_tcp_sockets::TcpClientSocketSettings;
+
+pub struct BridgeConfig {
+    pub host_port: String,
+    pub name: String,
+}
+
+impl From<&str> for BridgeConfig {
+    fn from(src: &str) -> Self {
+        let splitted = src.split("@").collect::<Vec<&str>>();
+        Self {
+            name: splitted[0].to_string(),
+            host_port: splitted[1].to_string(),
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl TcpClientSocketSettings for BridgeConfig {
+    async fn get_host_port(&self) -> String {
+        self.host_port.clone()
+    }
+}
