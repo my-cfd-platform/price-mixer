@@ -5,6 +5,12 @@ pub struct BridgeConfig {
     pub name: String,
 }
 
+impl BridgeConfig {
+    pub fn new(name: String, host_port: String) -> Self {
+        Self { name, host_port }
+    }
+}
+
 impl From<&str> for BridgeConfig {
     fn from(src: &str) -> Self {
         let splitted = src.split("@").collect::<Vec<&str>>();

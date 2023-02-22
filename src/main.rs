@@ -1,11 +1,11 @@
-use app::AppContext;
+use app::{AppContext, APP_NAME, APP_VERSION};
 use background::{publish_prices_loop::PublishPricesLoop, ConnectionsSynchronizerTimer};
 use my_no_sql_tcp_reader::{MyNoSqlDataReader, MyNoSqlTcpConnection};
 use my_service_bus_tcp_client::MyServiceBusClient;
 use nosql::{DefaultValuesEntity, InstrumentSourcesEntity};
 use rust_extensions::MyTimer;
 use service_bus_contracts::BidAskSbModel;
-use std::{env, sync::Arc};
+use std::sync::Arc;
 
 mod app;
 mod background;
@@ -18,13 +18,13 @@ mod src_feed_client;
 
 #[tokio::main]
 async fn main() {
-    let (app_name, app_version) = get_app_name_version();
+    let (app_name, app_version) = (APP_NAME, APP_VERSION);
     let settings_reader = Arc::new(settings_model::SettingsReader::new(".my-cfd-platform").await);
-    let settings = settings_reader.get_settings().await.settings;
+    let settings = settings_reader.get_settings().await;
 
     let logger = my_logger::LOGGER.clone();
 
-    let nosql_connection = MyNoSqlTcpConnection::new(app_name.clone(), settings_reader.clone());
+    let nosql_connection = MyNoSqlTcpConnection::new(app_name.to_string(), settings_reader.clone());
     let instruments_reader: Arc<MyNoSqlDataReader<InstrumentSourcesEntity>> =
         nosql_connection.get_reader().await;
     let defaults_reader: Arc<MyNoSqlDataReader<DefaultValuesEntity>> =
@@ -44,8 +44,6 @@ async fn main() {
         instruments_reader,
         defaults_reader,
         bidask_publisher,
-        app_name,
-        app_version,
     )
     .await;
     let app_ctx = Arc::new(app_ctx);
@@ -74,21 +72,4 @@ async fn main() {
     crate::http::start_up::setup_server(app_ctx.clone());
 
     app_ctx.app_states.wait_until_shutdown().await;
-}
-
-fn get_app_name_version() -> (String, String) {
-    let app_name = env::var("APP_NAME");
-    let app_name = if app_name.is_ok() {
-        app_name.unwrap()
-    } else {
-        format!("{}-dev", env!("CARGO_PKG_NAME"))
-    };
-    let app_version = env::var("APP_VERSION");
-    let app_version = if app_version.is_ok() {
-        app_version.unwrap()
-    } else {
-        "dev".to_string()
-    };
-
-    return (app_name, app_version);
 }

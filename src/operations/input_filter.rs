@@ -9,7 +9,7 @@ use crate::{
 use std::sync::Arc;
 
 pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &str) {
-    if can_we_send_quote(app, &bid_ask.instrument_id, src).await {
+    if !can_we_send_quote(app, &bid_ask.instrument_id, src).await {
         return;
     }
 

@@ -17,7 +17,6 @@ impl PublishPricesLoop {
 
     async fn get_messages_to_publish(&self) -> Option<Vec<BidAskDataTcpModel>> {
         let mut write_access = self.app.bid_ask_to_publish.lock().await;
-
         if write_access.len() == 0 {
             return None;
         }
@@ -40,7 +39,6 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                 })
                 .collect();
             let result = self.app.bidask_publisher.publish_messages(&sb_models).await;
-
             if let Err(err) = result {
                 self.app.logger.write_log(
                     my_logger::LogLevel::Error,

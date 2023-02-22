@@ -12,13 +12,14 @@ use service_bus_contracts::BidAskSbModel;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
 
+pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
+pub const APP_NAME: &'static str = env!("CARGO_PKG_NAME");
+
 pub struct AppContext {
     pub bridge_connections: Mutex<HashMap<String, BridgeConnection>>,
     pub bid_ask_to_publish: Mutex<Vec<BidAskDataTcpModel>>,
     pub publish_prices_loop: EventsLoop<()>,
     pub logger: Arc<MyLogger>,
-    pub app_name: String,
-    pub app_version: String,
     pub app_states: Arc<AppStates>,
     pub settings: Arc<SettingsModel>,
     pub instruments_reader: Arc<MyNoSqlDataReader<InstrumentSourcesEntity>>,
@@ -33,8 +34,6 @@ impl AppContext {
         instruments_reader: Arc<MyNoSqlDataReader<InstrumentSourcesEntity>>,
         defaults_reader: Arc<MyNoSqlDataReader<DefaultValuesEntity>>,
         bidask_publisher: MyServiceBusPublisher<BidAskSbModel>,
-        app_name: String,
-        app_version: String,
     ) -> Self {
         Self {
             bridge_connections: Mutex::new(HashMap::new()),
@@ -46,8 +45,6 @@ impl AppContext {
             instruments_reader,
             defaults_reader,
             bidask_publisher,
-            app_name,
-            app_version,
         }
     }
 }

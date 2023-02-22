@@ -25,9 +25,10 @@ impl MyTimerTick for ConnectionsSynchronizerTimer {
             .app
             .settings
             .bridges_config
-            .split("|")
-            .map(|x| Arc::new(BridgeConfig::from(x)))
+            .iter()
+            .map(|(name, host_port)| Arc::new(BridgeConfig::new(name.clone(), host_port.clone())))
             .collect();
+
         let mut bridge_connections = self.app.bridge_connections.lock().await;
 
         for bridge_settings in bridges_config {
