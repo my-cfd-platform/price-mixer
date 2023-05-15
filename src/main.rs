@@ -1,10 +1,11 @@
 use app::{AppContext, APP_NAME, APP_VERSION};
 use background::{publish_prices_loop::PublishPricesLoop, ConnectionsSynchronizerTimer};
+use cfd_engine_sb_contracts::BidAskSbModel;
 use my_no_sql_tcp_reader::{MyNoSqlDataReader, MyNoSqlTcpConnection};
+use my_nosql_contracts::TradingInstrumentNoSqlEntity;
 use my_service_bus_tcp_client::MyServiceBusClient;
 use nosql::{DefaultValuesEntity, InstrumentSourcesEntity};
 use rust_extensions::MyTimer;
-use service_bus_contracts::BidAskSbModel;
 use std::sync::Arc;
 
 mod app;
@@ -15,6 +16,7 @@ mod nosql;
 mod operations;
 mod settings_model;
 mod src_feed_client;
+mod models;
 
 #[tokio::main]
 async fn main() {
@@ -30,6 +32,9 @@ async fn main() {
     let defaults_reader: Arc<MyNoSqlDataReader<DefaultValuesEntity>> =
         nosql_connection.get_reader().await;
 
+    let instrument_reader: Arc<MyNoSqlDataReader<TradingInstrumentNoSqlEntity>> =
+        nosql_connection.get_reader().await;
+
     let sb_client = Arc::new(MyServiceBusClient::new(
         &app_name,
         &app_version,
@@ -42,6 +47,7 @@ async fn main() {
         Arc::new(settings),
         logger.clone(),
         instruments_reader,
+        instrument_reader,
         defaults_reader,
         bidask_publisher,
     )
@@ -66,7 +72,7 @@ async fn main() {
     bridge_sync_timer.register_timer(
         "BridgeSyncTymer",
         Arc::new(ConnectionsSynchronizerTimer::new(app_ctx.clone())),
-    );
+    );  
 
     bridge_sync_timer.start(app_ctx.app_states.clone(), app_ctx.logger.clone());
     crate::http::start_up::setup_server(app_ctx.clone());

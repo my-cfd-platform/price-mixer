@@ -1,7 +1,6 @@
-use crate::app::AppContext;
-use prices_tcp_contracts::BidAskDataTcpModel;
+use crate::{app::AppContext, models::PriceMixerBidAskModel};
+use cfd_engine_sb_contracts::BidAskSbModel;
 use rust_extensions::events_loop::EventsLoopTick;
-use service_bus_contracts::BidAskSbModel;
 use std::sync::Arc;
 
 use super::map_bid_ask_to_sb_model;
@@ -15,7 +14,7 @@ impl PublishPricesLoop {
         Self { app }
     }
 
-    async fn get_messages_to_publish(&self) -> Option<Vec<BidAskDataTcpModel>> {
+    async fn get_messages_to_publish(&self) -> Option<Vec<PriceMixerBidAskModel>> {
         let mut write_access = self.app.bid_ask_to_publish.lock().await;
         if write_access.len() == 0 {
             return None;
