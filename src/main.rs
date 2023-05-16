@@ -12,11 +12,11 @@ mod app;
 mod background;
 mod bridge_config;
 mod http;
+mod models;
 mod nosql;
 mod operations;
 mod settings_model;
 mod src_feed_client;
-mod models;
 
 #[tokio::main]
 async fn main() {
@@ -59,7 +59,7 @@ async fn main() {
         .register_event_loop(Arc::new(PublishPricesLoop::new(app_ctx.clone())))
         .await;
 
-    nosql_connection.start().await;
+    nosql_connection.start(app_ctx.logger.clone()).await;
     sb_client.start().await;
 
     app_ctx
@@ -72,7 +72,7 @@ async fn main() {
     bridge_sync_timer.register_timer(
         "BridgeSyncTymer",
         Arc::new(ConnectionsSynchronizerTimer::new(app_ctx.clone())),
-    );  
+    );
 
     bridge_sync_timer.start(app_ctx.app_states.clone(), app_ctx.logger.clone());
     crate::http::start_up::setup_server(app_ctx.clone());
