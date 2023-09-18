@@ -4,8 +4,10 @@ use prices_tcp_contracts::BidAskDataTcpModel;
 use crate::{
     app::AppContext,
     background::map_tcp_to_inner,
-    nosql::{DEFAULT_VALUES_PK, INSTRUMENT_SOURCES_PK, LP_DEFAULT},
-    DefaultValuesEntity, InstrumentSourcesEntity,
+    nosql::{
+        DefaultValuesEntity, InstrumentSourcesEntity, DEFAULT_VALUES_PK, INSTRUMENT_SOURCES_PK,
+        LP_DEFAULT,
+    },
 };
 
 use std::sync::Arc;
@@ -15,11 +17,15 @@ pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &s
         return;
     }
 
-    let Some(instrument) = app.instrument_reader.get_entity(
-        TradingInstrumentNoSqlEntity::generate_partition_key(),
-        &bid_ask.instrument_id,
-    ).await else{
-        return ;
+    let Some(instrument) = app
+        .instrument_reader
+        .get_entity(
+            TradingInstrumentNoSqlEntity::generate_partition_key(),
+            &bid_ask.instrument_id,
+        )
+        .await
+    else {
+        return;
     };
 
     let mut write_access = app.bid_ask_to_publish.lock().await;

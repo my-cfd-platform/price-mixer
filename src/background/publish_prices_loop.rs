@@ -1,6 +1,7 @@
 use crate::{app::AppContext, models::PriceMixerBidAskModel};
 use cfd_engine_sb_contracts::BidAskSbModel;
 use rust_extensions::events_loop::EventsLoopTick;
+use service_sdk::my_logger::LogEventCtx;
 use std::sync::Arc;
 
 use super::map_bid_ask_to_sb_model;
@@ -37,13 +38,16 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                     return map_bid_ask_to_sb_model(message);
                 })
                 .collect();
-            let result = self.app.bidask_publisher.publish_messages(&sb_models).await;
+            let result = self
+                .app
+                .bidask_publisher
+                .publish_messages(&sb_models, None)
+                .await;
             if let Err(err) = result {
-                self.app.logger.write_log(
-                    my_logger::LogLevel::Error,
+                service_sdk::my_logger::LOGGER.write_error(
                     "PublishingToSB".to_string(),
                     format!("Err: {:?}", err),
-                    None,
+                    LogEventCtx::new(),
                 );
             }
         }

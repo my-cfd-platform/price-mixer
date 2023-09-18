@@ -1,53 +1,40 @@
 use super::BridgeConnection;
 use crate::{
-    settings_model::SettingsModel, DefaultValuesEntity,
-    InstrumentSourcesEntity, models::PriceMixerBidAskModel,
+    models::PriceMixerBidAskModel, settings_model::SettingsReader, nosql::{InstrumentSourcesEntity, DefaultValuesEntity},
 };
 use cfd_engine_sb_contracts::BidAskSbModel;
-use my_logger::MyLogger;
-use my_no_sql_tcp_reader::MyNoSqlDataReader;
 use my_nosql_contracts::TradingInstrumentNoSqlEntity;
-use my_service_bus_abstractions::publisher::MyServiceBusPublisher;
-use rust_extensions::{events_loop::EventsLoop, AppStates};
+use rust_extensions::events_loop::EventsLoop;
+use service_sdk::{
+    my_no_sql_sdk::reader::MyNoSqlDataReader,
+    my_service_bus::abstractions::publisher::MyServiceBusPublisher, ServiceContext,
+};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
-
-pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
-pub const APP_NAME: &'static str = env!("CARGO_PKG_NAME");
 
 pub struct AppContext {
     pub bridge_connections: Mutex<HashMap<String, BridgeConnection>>,
     pub bid_ask_to_publish: Mutex<Vec<PriceMixerBidAskModel>>,
     pub publish_prices_loop: EventsLoop<()>,
-    pub logger: Arc<MyLogger>,
-    pub app_states: Arc<AppStates>,
-    pub settings: Arc<SettingsModel>,
-    pub instrument_sources_reader: Arc<MyNoSqlDataReader<InstrumentSourcesEntity>>,
-    pub instrument_reader: Arc<MyNoSqlDataReader<TradingInstrumentNoSqlEntity>>,
-    pub defaults_reader: Arc<MyNoSqlDataReader<DefaultValuesEntity>>,
+    pub instrument_sources_reader:
+        Arc<dyn MyNoSqlDataReader<InstrumentSourcesEntity> + Send + Sync>,
+    pub instrument_reader: Arc<dyn MyNoSqlDataReader<TradingInstrumentNoSqlEntity> + Send + Sync>,
+    pub defaults_reader: Arc<dyn MyNoSqlDataReader<DefaultValuesEntity> + Send + Sync>,
     pub bidask_publisher: MyServiceBusPublisher<BidAskSbModel>,
+    pub settings: Arc<SettingsReader>
 }
 
 impl AppContext {
-    pub async fn new(
-        settings: Arc<SettingsModel>,
-        logger: Arc<MyLogger>,
-        instrument_sources_reader: Arc<MyNoSqlDataReader<InstrumentSourcesEntity>>,
-        instrument_reader: Arc<MyNoSqlDataReader<TradingInstrumentNoSqlEntity>>,
-        defaults_reader: Arc<MyNoSqlDataReader<DefaultValuesEntity>>,
-        bidask_publisher: MyServiceBusPublisher<BidAskSbModel>,
-    ) -> Self {
+    pub async fn new(settings: Arc<SettingsReader>, sc: &ServiceContext) -> Self {
         Self {
             bridge_connections: Mutex::new(HashMap::new()),
             publish_prices_loop: EventsLoop::new("Output Mixer".to_string()),
             bid_ask_to_publish: Mutex::new(Vec::new()),
-            logger,
-            app_states: Arc::new(AppStates::create_initialized()),
-            settings,
-            instrument_reader,
-            instrument_sources_reader,
-            defaults_reader,
-            bidask_publisher,
+            instrument_sources_reader: sc.get_ns_reader().await,
+            instrument_reader: sc.get_ns_reader().await,
+            defaults_reader: sc.get_ns_reader().await,
+            bidask_publisher: sc.get_sb_publisher(false).await,
+            settings
         }
     }
 }

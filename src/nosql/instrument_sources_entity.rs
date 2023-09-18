@@ -1,6 +1,6 @@
-use my_no_sql_server_abstractions::MyNoSqlEntity;
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 use serde::{Deserialize, Serialize};
+use service_sdk::my_no_sql_sdk::abstractions::MyNoSqlEntity;
 
 pub const PRICE_SOURCES_TABLE_NAME: &str = "instrument-sources";
 pub const INSTRUMENT_SOURCES_PK: &str = "qg";

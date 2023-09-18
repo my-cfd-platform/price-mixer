@@ -1,19 +1,22 @@
 use std::collections::HashMap;
 
-use my_no_sql_tcp_reader::MyNoSqlTcpConnectionSettings;
-use my_service_bus_tcp_client::MyServiceBusSettings;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
+use service_sdk::{
+    my_no_sql_sdk::reader::MyNoSqlTcpConnectionSettings,
+    my_service_bus::client::MyServiceBusSettings,
+};
 
-#[derive(my_settings_reader::SettingsModel, Serialize, Deserialize, Debug, Clone)]
+service_sdk::macros::use_settings!();
+
+#[derive(
+    my_settings_reader::SettingsModel, SdkSettingsTraits, Serialize, Deserialize, Debug, Clone,
+)]
 pub struct SettingsModel {
-    #[serde(rename = "MyServiceBusHostPort")]
     pub sb_connection: String,
-    #[serde(rename = "SeqConnString")]
     pub seq_conn_string: String,
-    #[serde(rename = "DictionariesMyNoSqlServerReader")]
     pub no_sql_reader: String,
-    #[serde(rename = "PriceFeeds")]
     pub bridges_config: HashMap<String, String>,
+    pub my_telemetry: String,
 }
 
 #[async_trait::async_trait]
@@ -32,5 +35,21 @@ impl MyServiceBusSettings for SettingsReader {
         let read_access = self.settings.read().await;
 
         read_access.sb_connection.clone()
+    }
+}
+
+#[async_trait::async_trait]
+impl service_sdk::my_telemetry::my_telemetry_writer::MyTelemetrySettings for SettingsReader {
+    async fn get_telemetry_url(&self) -> String {
+        let read_access = self.settings.read().await;
+        read_access.my_telemetry.clone()
+    }
+}
+
+#[async_trait::async_trait]
+impl service_sdk::my_logger::my_seq_logger::SeqSettings for SettingsReader {
+    async fn get_conn_string(&self) -> String {
+        let read_access = self.settings.read().await;
+        read_access.seq_conn_string.clone()
     }
 }

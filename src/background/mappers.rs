@@ -10,8 +10,8 @@ pub fn map_bid_ask_to_sb_model(model: &PriceMixerBidAskModel) -> BidAskSbModel {
         date_time_unix_milis: model.date.unix_microseconds as u64,
         bid: model.bid,
         ask: model.ask,
-        base: Some(model.base.clone()),
-        quote: Some(model.quote.clone()),
+        base: model.base.clone(),
+        quote: model.quote.clone(),
     }
 }
 

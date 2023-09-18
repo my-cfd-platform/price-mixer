@@ -21,9 +21,8 @@ impl ConnectionsSynchronizerTimer {
 #[async_trait::async_trait]
 impl MyTimerTick for ConnectionsSynchronizerTimer {
     async fn tick(&self) {
-        let bridges_config: Vec<Arc<BridgeConfig>> = self
-            .app
-            .settings
+        let settings = self.app.settings.get_settings().await;
+        let bridges_config: Vec<Arc<BridgeConfig>> = settings
             .bridges_config
             .iter()
             .map(|(name, host_port)| Arc::new(BridgeConfig::new(name.clone(), host_port.clone())))
@@ -53,7 +52,7 @@ impl MyTimerTick for ConnectionsSynchronizerTimer {
                         self.app.clone(),
                         bridge_settings.name.clone(),
                     )),
-                    self.app.logger.clone(),
+                    service_sdk::my_logger::LOGGER.clone(),
                 )
                 .await;
 
