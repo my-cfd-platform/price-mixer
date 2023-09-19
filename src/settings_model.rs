@@ -1,11 +1,6 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use service_sdk::{
-    my_no_sql_sdk::reader::MyNoSqlTcpConnectionSettings,
-    my_service_bus::client::MyServiceBusSettings,
-};
-
 service_sdk::macros::use_settings!();
 
 #[derive(
