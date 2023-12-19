@@ -1,7 +1,6 @@
 use crate::{app::AppContext, models::PriceMixerBidAskModel};
-use cfd_engine_sb_contracts::BidAskSbModel;
-use rust_extensions::events_loop::EventsLoopTick;
 use service_sdk::my_logger::LogEventCtx;
+use service_sdk::rust_extensions::events_loop::EventsLoopTick;
 use std::sync::Arc;
 
 use super::map_bid_ask_to_sb_model;
@@ -32,16 +31,17 @@ impl PublishPricesLoop {
 impl EventsLoopTick<()> for PublishPricesLoop {
     async fn tick(&self, _: ()) {
         if let Some(messages_to_publish) = self.get_messages_to_publish().await {
-            let sb_models: Vec<BidAskSbModel> = messages_to_publish
-                .iter()
+            let sb_models: Vec<_> = messages_to_publish
+                .into_iter()
                 .map(|message| {
                     return map_bid_ask_to_sb_model(message);
                 })
                 .collect();
+
             let result = self
                 .app
-                .bidask_publisher
-                .publish_messages(&sb_models, None)
+                .bid_ask_publisher
+                .publish_messages(sb_models.iter().map(|itm| (itm, None)))
                 .await;
             if let Err(err) = result {
                 service_sdk::my_logger::LOGGER.write_error(

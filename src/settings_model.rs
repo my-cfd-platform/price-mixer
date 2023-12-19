@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 service_sdk::macros::use_settings!();
 
@@ -10,7 +8,6 @@ pub struct SettingsModel {
     pub sb_connection: String,
     pub seq_conn_string: String,
     pub no_sql_reader: String,
-    pub bridges_config: HashMap<String, String>,
     pub my_telemetry: String,
 }
 

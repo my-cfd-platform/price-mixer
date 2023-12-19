@@ -26,11 +26,12 @@ async fn main() {
         .register_event_loop(Arc::new(PublishPricesLoop::new(app_context.clone())))
         .await;
 
-    service_context.register_background_job(
-        Duration::from_secs(10),
-        "BridgeSyncTimer",
-        Arc::new(ConnectionsSynchronizerTimer::new(app_context.clone())),
-    );
+    service_context.register_timer(Duration::from_secs(10), |timer| {
+        timer.register_timer(
+            "BridgeSyncTimer",
+            Arc::new(ConnectionsSynchronizerTimer::new(app_context.clone())),
+        )
+    });
 
     app_context
         .publish_prices_loop

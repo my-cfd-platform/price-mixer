@@ -3,9 +3,10 @@ use crate::{
     bridge_config::BridgeConfig,
     src_feed_client::TcpConnectionEvents,
 };
+use my_nosql_contracts::PriceBridgesSettings;
 use my_tcp_sockets::TcpClient;
 use prices_tcp_contracts::BidAskTcpSerializer;
-use rust_extensions::MyTimerTick;
+use service_sdk::rust_extensions::MyTimerTick;
 use std::sync::Arc;
 
 pub struct ConnectionsSynchronizerTimer {
@@ -21,9 +22,25 @@ impl ConnectionsSynchronizerTimer {
 #[async_trait::async_trait]
 impl MyTimerTick for ConnectionsSynchronizerTimer {
     async fn tick(&self) {
-        let settings = self.app.settings.get_settings().await;
-        let bridges_config: Vec<Arc<BridgeConfig>> = settings
-            .bridges_config
+        let settings = self
+            .app
+            .price_bridges_settings
+            .get_entity(
+                PriceBridgesSettings::PARTITION_KEY,
+                PriceBridgesSettings::ROW_KEY.unwrap(),
+            )
+            .await;
+
+        if settings.is_none() {
+            return;
+        }
+
+        let settings = settings.unwrap();
+
+        let price_bridges_settings = settings.unwrap_price_bridges_settings();
+
+        let bridges_config: Vec<Arc<BridgeConfig>> = price_bridges_settings
+            .bridges
             .iter()
             .map(|(name, host_port)| Arc::new(BridgeConfig::new(name.clone(), host_port.clone())))
             .collect();

@@ -4,10 +4,7 @@ use prices_tcp_contracts::BidAskDataTcpModel;
 use crate::{
     app::AppContext,
     background::map_tcp_to_inner,
-    nosql::{
-        DefaultValuesEntity, InstrumentSourcesEntity, DEFAULT_VALUES_PK, INSTRUMENT_SOURCES_PK,
-        LP_DEFAULT,
-    },
+    nosql::{DefaultValuesEntity, InstrumentSourcesEntity},
 };
 
 use std::sync::Arc;
@@ -40,7 +37,7 @@ pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &s
 pub async fn can_we_send_quote(app: &Arc<AppContext>, instrument_id: &str, source: &str) -> bool {
     let quote_map: Option<Arc<InstrumentSourcesEntity>> = app
         .instrument_sources_reader
-        .get_entity(INSTRUMENT_SOURCES_PK, instrument_id)
+        .get_entity(InstrumentSourcesEntity::PARTITION_KEY, instrument_id)
         .await;
 
     if quote_map.is_some() {
@@ -49,7 +46,10 @@ pub async fn can_we_send_quote(app: &Arc<AppContext>, instrument_id: &str, sourc
 
     let default_lp: Option<Arc<DefaultValuesEntity>> = app
         .defaults_reader
-        .get_entity(DEFAULT_VALUES_PK, LP_DEFAULT)
+        .get_entity(
+            DefaultValuesEntity::DEFAULT_VALUES_PARTITION_KEY,
+            DefaultValuesEntity::LP_DEFAULT_ROW_KEY,
+        )
         .await;
 
     if default_lp.is_some() {
