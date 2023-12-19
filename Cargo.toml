@@ -10,7 +10,6 @@ service-sdk = { git = "https://github.com/MyJetTools/service-sdk", tag = "0.2.5"
     "macros",
     "grpc",
     "my-service-bus",
-    "postgres",
     "my-nosql-data-reader-sdk",
 ] }
 my-nosql-contracts = { tag = "0.1.24", git = "https://github.com/my-cfd-platform/my-nosql-contracts.git" }
