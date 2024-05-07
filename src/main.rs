@@ -8,7 +8,7 @@ mod app;
 mod background;
 mod bridge_config;
 mod models;
-mod nosql;
+//mod nosql;
 mod operations;
 mod settings_model;
 mod src_feed_client;

@@ -3,7 +3,7 @@ use crate::{
     bridge_config::BridgeConfig,
     src_feed_client::TcpConnectionEvents,
 };
-use my_nosql_contracts::PriceBridgesSettings;
+use my_nosql_contracts::{PriceBridgesSettings, ProductSettings};
 use my_tcp_sockets::TcpClient;
 use prices_tcp_contracts::TcpFeedSerializerFactory;
 use service_sdk::{my_no_sql_sdk::abstractions::MyNoSqlEntity, rust_extensions::MyTimerTick};
@@ -32,7 +32,7 @@ impl MyTimerTick for ConnectionsSynchronizerTimer {
             .await;
 
         if settings.is_none() {
-            println!("No price source settings found. Please fill my_no_sql Table: {} with PartitionKey: {} RowKey: {:?}", PriceBridgesSettings::TABLE_NAME,PriceBridgesSettings::PARTITION_KEY, PriceBridgesSettings::ROW_KEY);
+            println!("No price source settings found. Please fill my_no_sql Table: {} with PartitionKey: {} RowKey: {:?}", ProductSettings::TABLE_NAME,PriceBridgesSettings::PARTITION_KEY, PriceBridgesSettings::ROW_KEY);
             return;
         }
 
