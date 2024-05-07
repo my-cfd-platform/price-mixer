@@ -12,8 +12,8 @@ service-sdk = { git = "https://github.com/MyJetTools/service-sdk", tag = "0.2.5"
     "my-service-bus",
     "my-nosql-data-reader-sdk",
 ] }
-my-nosql-contracts = { tag = "0.1.24", git = "https://github.com/my-cfd-platform/my-nosql-contracts.git" }
-cfd-engine-sb-contracts = { tag = "0.2.8", git = "https://github.com/my-cfd-platform/cfd-engine-sb-contracts.git" }
+my-nosql-contracts = { tag = "0.1.30", git = "https://github.com/my-cfd-platform/my-nosql-contracts.git" }
+cfd-engine-sb-contracts = { tag = "0.2.18", git = "https://github.com/my-cfd-platform/cfd-engine-sb-contracts.git" }
 
 serde = "*"
 tonic = { version = "*", features = ["tls", "tls-roots", "prost"] }
@@ -23,6 +23,6 @@ prost-types = "*"
 tokio-util = "*"
 async-trait = "*"
 
-my-tcp-sockets = { tag = "0.1.8", git = "https://github.com/MyJetTools/my-tcp-sockets.git" }
+my-tcp-sockets = { tag = "0.1.9", git = "https://github.com/MyJetTools/my-tcp-sockets.git" }
 
-prices-tcp-contracts = { tag = "0.1.2", git = "https://github.com/my-cfd-platform/prices-tcp-contracts" }
+prices-tcp-contracts = { tag = "0.1.3", git = "https://github.com/my-cfd-platform/prices-tcp-contracts" }

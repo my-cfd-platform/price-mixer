@@ -29,6 +29,14 @@ impl PublishPricesLoop {
 
 #[async_trait::async_trait]
 impl EventsLoopTick<()> for PublishPricesLoop {
+    async fn started(&self) {
+        println!("PublishPricesLoop started");
+    }
+
+    async fn finished(&self) {
+        println!("PublishPricesLoop finished");
+    }
+
     async fn tick(&self, _: ()) {
         if let Some(messages_to_publish) = self.get_messages_to_publish().await {
             let sb_models: Vec<_> = messages_to_publish

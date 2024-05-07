@@ -5,7 +5,7 @@ use crate::{
 };
 use my_nosql_contracts::PriceBridgesSettings;
 use my_tcp_sockets::TcpClient;
-use prices_tcp_contracts::BidAskTcpSerializer;
+use prices_tcp_contracts::TcpFeedSerializerFactory;
 use service_sdk::rust_extensions::MyTimerTick;
 use std::sync::Arc;
 
@@ -64,7 +64,7 @@ impl MyTimerTick for ConnectionsSynchronizerTimer {
             bridge_connection
                 .tcp_client
                 .start(
-                    Arc::new(|| -> BidAskTcpSerializer { BidAskTcpSerializer::new() }),
+                    Arc::new(TcpFeedSerializerFactory),
                     Arc::new(TcpConnectionEvents::new(
                         self.app.clone(),
                         bridge_settings.name.clone(),

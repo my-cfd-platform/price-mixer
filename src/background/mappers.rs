@@ -20,7 +20,7 @@ pub fn map_tcp_to_inner(
     base: &str,
     quote: &str,
 ) -> PriceMixerBidAskModel {
-    let date_time = match model.datetime {
+    let date_time = match model.date_time {
         BidAskDateTimeTcpModel::Source(date) => date,
         BidAskDateTimeTcpModel::Our(date) => date,
         BidAskDateTimeTcpModel::Generated(date) => date,

@@ -23,7 +23,7 @@ impl From<&str> for BridgeConfig {
 
 #[async_trait::async_trait]
 impl TcpClientSocketSettings for BridgeConfig {
-    async fn get_host_port(&self) -> String {
-        self.host_port.clone()
+    async fn get_host_port(&self) -> Option<String> {
+        Some(self.host_port.clone())
     }
 }

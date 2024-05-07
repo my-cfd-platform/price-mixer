@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use my_tcp_sockets::{ConnectionEvent, SocketEventCallback};
+use my_tcp_sockets::{tcp_connection::TcpSocketConnection, SocketEventCallback};
 use prices_tcp_contracts::{BidAskTcpMessage, BidAskTcpSerializer};
 
 use crate::app::AppContext;
@@ -17,32 +17,33 @@ impl TcpConnectionEvents {
 }
 
 #[async_trait::async_trait]
-impl SocketEventCallback<BidAskTcpMessage, BidAskTcpSerializer> for TcpConnectionEvents {
-    async fn handle(
+impl SocketEventCallback<BidAskTcpMessage, BidAskTcpSerializer, ()> for TcpConnectionEvents {
+    async fn connected(
         &self,
-        connection_event: ConnectionEvent<BidAskTcpMessage, BidAskTcpSerializer>,
+        _connection: Arc<TcpSocketConnection<BidAskTcpMessage, BidAskTcpSerializer, ()>>,
     ) {
-        match connection_event {
-            ConnectionEvent::Connected(_) => {
-                println!("Connected to Feed");
-            }
-            ConnectionEvent::Disconnected(_) => {
-                println!("Disconnected from Feed");
-            }
-            ConnectionEvent::Payload {
-                connection,
-                payload,
-            } => {
-                if payload.is_ping() {
-                    connection.send(BidAskTcpMessage::Pong).await;
-                    return;
-                }
+        println!("Connected to Feed {}", self.id);
+    }
 
-                if let BidAskTcpMessage::BidAsk(bid_ask) = payload {
-                    crate::operations::input_filter::process(&self.app_ctx, bid_ask, &self.id)
-                        .await;
-                }
-            }
+    async fn disconnected(
+        &self,
+        _connection: Arc<TcpSocketConnection<BidAskTcpMessage, BidAskTcpSerializer, ()>>,
+    ) {
+        println!("Disconnected from Feed {}", self.id);
+    }
+
+    async fn payload(
+        &self,
+        connection: &Arc<TcpSocketConnection<BidAskTcpMessage, BidAskTcpSerializer, ()>>,
+        contract: BidAskTcpMessage,
+    ) {
+        if contract.is_ping() {
+            connection.send(&BidAskTcpMessage::Pong).await;
+            return;
+        }
+
+        if let BidAskTcpMessage::BidAsk(bid_ask) = contract {
+            crate::operations::input_filter::process(&self.app_ctx, bid_ask, &self.id).await;
         }
     }
 }
