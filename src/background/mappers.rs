@@ -1,6 +1,5 @@
 use cfd_engine_sb_contracts::BidAskSbModel;
 use prices_tcp_contracts::{BidAskDataTcpModel, BidAskDateTimeTcpModel};
-use service_sdk::rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::models::PriceMixerBidAskModel;
 
@@ -20,7 +19,7 @@ pub fn map_tcp_to_inner(
     base: &str,
     quote: &str,
 ) -> PriceMixerBidAskModel {
-    let date_time = match model.date_time {
+    let date = match model.date_time {
         BidAskDateTimeTcpModel::Source(date) => date,
         BidAskDateTimeTcpModel::Our(date) => date,
         BidAskDateTimeTcpModel::Generated(date) => date,
@@ -31,7 +30,7 @@ pub fn map_tcp_to_inner(
         bid: model.bid,
         ask: model.ask,
         volume: model.volume,
-        date: DateTimeAsMicroseconds::from(date_time.timestamp_millis()),
+        date,
         base: base.to_string(),
         quote: quote.to_string(),
     }
