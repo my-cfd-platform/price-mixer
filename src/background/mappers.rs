@@ -64,14 +64,3 @@ pub fn map_tcp_to_inner(
         quote: quote.to_string(),
     }
 }
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test() {
-        let value = i64::pow(10, 2);
-
-        print!("{}", 1.0 / value as f64)
-    }
-}

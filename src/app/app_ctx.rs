@@ -19,7 +19,6 @@ pub struct AppContext {
     pub price_bridges_settings: Arc<MyNoSqlDataReaderTcp<ProductSettings>>,
     pub markups: Arc<MyNoSqlDataReaderTcp<MarkupProfileNoSqlEntity>>,
     pub bid_ask_publisher: MyServiceBusPublisher<BidAskSbModel>,
-
     pub settings: Arc<SettingsReader>,
 }
 
