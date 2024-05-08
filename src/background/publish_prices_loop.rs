@@ -1,9 +1,11 @@
 use crate::{app::AppContext, models::PriceMixerBidAskModel};
+use cfd_engine_sb_contracts::BidAskSbModel;
+use my_nosql_contracts::{MarkupProfileNoSqlEntity, TradingInstrumentNoSqlEntity};
 use service_sdk::my_logger::LogEventCtx;
 use service_sdk::rust_extensions::events_loop::EventsLoopTick;
 use std::sync::Arc;
 
-use super::map_bid_ask_to_sb_model;
+use super::{map_bid_ask_to_sb_model, map_bid_ask_to_sb_model_with_markup};
 
 pub struct PublishPricesLoop {
     pub app: Arc<AppContext>,
@@ -39,12 +41,61 @@ impl EventsLoopTick<()> for PublishPricesLoop {
 
     async fn tick(&self, _: ()) {
         if let Some(messages_to_publish) = self.get_messages_to_publish().await {
-            let sb_models: Vec<_> = messages_to_publish
-                .into_iter()
-                .map(|message| {
-                    return map_bid_ask_to_sb_model(message);
-                })
-                .collect();
+            let mark_ups = self
+                .app
+                .markups
+                .get_entity(
+                    MarkupProfileNoSqlEntity::generate_partition_key(),
+                    MarkupProfileNoSqlEntity::GLOBAL_PROFILE_ID,
+                )
+                .await;
+
+            let sb_models: Vec<BidAskSbModel> = match mark_ups {
+                Some(profile) => {
+                    if profile.disabled {
+                        messages_to_publish
+                            .into_iter()
+                            .map(|message| {
+                                return map_bid_ask_to_sb_model(message);
+                            })
+                            .collect()
+                    } else {
+                        let mut result = Vec::with_capacity(messages_to_publish.len());
+
+                        for message in messages_to_publish {
+                            if let Some(profile) = profile.instruments.get(&message.id) {
+                                let instrument = self
+                                    .app
+                                    .instrument_reader
+                                    .get_entity(
+                                        TradingInstrumentNoSqlEntity::generate_partition_key(),
+                                        &message.id,
+                                    )
+                                    .await;
+
+                                if let Some(instrument) = instrument {
+                                    result.push(map_bid_ask_to_sb_model_with_markup(
+                                        message,
+                                        profile.markup_bid,
+                                        profile.markup_ask,
+                                        instrument.digits,
+                                    ));
+                                }
+                            } else {
+                                result.push(map_bid_ask_to_sb_model(message));
+                            }
+                        }
+
+                        result
+                    }
+                }
+                None => messages_to_publish
+                    .into_iter()
+                    .map(|message| {
+                        return map_bid_ask_to_sb_model(message);
+                    })
+                    .collect(),
+            };
 
             let result = self
                 .app

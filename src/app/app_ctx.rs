@@ -1,7 +1,7 @@
 use super::BridgeConnection;
 use crate::{models::PriceMixerBidAskModel, settings_model::SettingsReader};
 use cfd_engine_sb_contracts::BidAskSbModel;
-use my_nosql_contracts::{InstrumentSourcesEntity, ProductSettings, TradingInstrumentNoSqlEntity};
+use my_nosql_contracts::*;
 use service_sdk::{
     my_no_sql_sdk::reader::MyNoSqlDataReaderTcp,
     rust_extensions::events_loop::EventsLoopMutexWrapped,
@@ -17,7 +17,9 @@ pub struct AppContext {
     pub instrument_sources_reader: Arc<MyNoSqlDataReaderTcp<InstrumentSourcesEntity>>,
     pub instrument_reader: Arc<MyNoSqlDataReaderTcp<TradingInstrumentNoSqlEntity>>,
     pub price_bridges_settings: Arc<MyNoSqlDataReaderTcp<ProductSettings>>,
+    pub markups: Arc<MyNoSqlDataReaderTcp<MarkupProfileNoSqlEntity>>,
     pub bid_ask_publisher: MyServiceBusPublisher<BidAskSbModel>,
+
     pub settings: Arc<SettingsReader>,
 }
 
@@ -30,6 +32,7 @@ impl AppContext {
             instrument_sources_reader: sc.get_ns_reader().await,
             instrument_reader: sc.get_ns_reader().await,
             price_bridges_settings: sc.get_ns_reader().await,
+            markups: sc.get_ns_reader().await,
             bid_ask_publisher: sc.get_sb_publisher(false).await,
             settings,
         }
