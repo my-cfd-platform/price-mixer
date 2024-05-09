@@ -64,7 +64,7 @@ impl EventsLoopTick<()> for PublishPricesLoop {
 
                         for message in messages_to_publish {
                             if message.id == "EURUSD" {
-                                println!("EURUSD has GLOBAL Profile to apply. {:?}", profile);
+                                println!("EURUSD before GLOBAL profile. {:?}", message);
                             }
 
                             if let Some(profile) = profile.instruments.get(&message.id) {
@@ -78,12 +78,21 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                                     .await;
 
                                 if let Some(instrument) = instrument {
-                                    result.push(map_bid_ask_to_sb_model_with_markup(
+                                    if message.id == "EURUSD" {
+                                        println!("EURUSD after GLOBAL profile. {:?}", message);
+                                    }
+
+                                    let model = map_bid_ask_to_sb_model_with_markup(
                                         message,
                                         profile.markup_bid,
                                         profile.markup_ask,
                                         instrument.digits,
-                                    ));
+                                    );
+
+                                    if model.id == "EURUSD" {
+                                        println!("EURUSD after global apply. {:?}", model);
+                                    }
+                                    result.push(model);
                                 }
                             } else {
                                 result.push(map_bid_ask_to_sb_model(message));

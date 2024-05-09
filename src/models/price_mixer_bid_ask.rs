@@ -1,5 +1,6 @@
 use service_sdk::rust_extensions::date_time::DateTimeAsMicroseconds;
 
+#[derive(Debug, Clone)]
 pub struct PriceMixerBidAskModel {
     pub id: String,
     pub bid: f64,
