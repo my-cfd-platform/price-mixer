@@ -94,7 +94,7 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                                         println!(
                                             "EURUSD after global apply. {:?}. Spread: {}",
                                             model,
-                                            model.ask - model.bid * 100000.0
+                                            ((model.ask - model.bid) * 100000.0) as i64
                                         );
                                     }
                                     result.push(model);
