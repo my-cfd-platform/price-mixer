@@ -63,6 +63,10 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                         let mut result = Vec::with_capacity(messages_to_publish.len());
 
                         for message in messages_to_publish {
+                            if message.id == "EURUSD" {
+                                println!("EURUSD has GLOBAL Profile to apply. {:?}", profile);
+                            }
+
                             if let Some(profile) = profile.instruments.get(&message.id) {
                                 let instrument = self
                                     .app
