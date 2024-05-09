@@ -63,9 +63,10 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                         let mut result = Vec::with_capacity(messages_to_publish.len());
 
                         for message in messages_to_publish {
+                            let mut to_print = Vec::new();
                             if message.id == "EURUSD" {
-                                println!("------");
-                                println!("EURUSD GLOBAL profile. {:?}", profile);
+                                to_print.push(format!("------"));
+                                to_print.push(format!("EURUSD GLOBAL profile. {:?}", profile));
                             }
 
                             if let Some(profile) = profile.instruments.get(&message.id) {
@@ -80,7 +81,10 @@ impl EventsLoopTick<()> for PublishPricesLoop {
 
                                 if let Some(instrument) = instrument {
                                     if message.id == "EURUSD" {
-                                        println!("EURUSD after GLOBAL profile. {:?}", message);
+                                        to_print.push(format!(
+                                            "EURUSD after GLOBAL profile. {:?}",
+                                            message
+                                        ));
                                     }
 
                                     let model = map_bid_ask_to_sb_model_with_markup(
@@ -91,10 +95,17 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                                     );
 
                                     if model.id == "EURUSD" {
+                                        let spread = ((model.ask - model.bid) * 100000.0) as i64;
+
+                                        if spread < 5 {
+                                            for itm in to_print {
+                                                println!("{}", itm);
+                                            }
+                                        }
+
                                         println!(
                                             "EURUSD after global apply. {:?}. Spread: {}",
-                                            model,
-                                            ((model.ask - model.bid) * 100000.0) as i64
+                                            model, spread
                                         );
                                     }
                                     result.push(model);
