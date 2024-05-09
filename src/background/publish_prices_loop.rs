@@ -98,7 +98,7 @@ fn compile_with_markup_profile(
             .get(&message.bid_ask.instrument_id)
         {
             if message.bid_ask.instrument_id == "EURUSD" {
-                println!("EURUSD after GLOBAL profile. {:?}", message.bid_ask);
+                println!("EURUSD before GLOBAL profile. {:?}", message.bid_ask);
             }
 
             let model = map_bid_ask_to_sb_model_with_markup(
