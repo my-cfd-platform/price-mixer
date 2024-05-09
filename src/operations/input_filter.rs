@@ -36,6 +36,8 @@ pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &s
     }
 
     app.bid_ask_to_publish.publish(instrument, bid_ask).await;
+
+    app.publish_prices_loop.send(());
 }
 
 /*
