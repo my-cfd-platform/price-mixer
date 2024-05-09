@@ -88,10 +88,9 @@ fn compile_with_markup_profile(
     let mut result = Vec::with_capacity(messages_to_publish.len());
 
     for message in messages_to_publish {
-        let mut to_print = Vec::new();
         if message.bid_ask.instrument_id == "EURUSD" {
-            to_print.push(format!("------"));
-            to_print.push(format!("EURUSD GLOBAL profile. {:?}", markup_profile));
+            println!("------");
+            println!("EURUSD GLOBAL profile. {:?}", markup_profile);
         }
 
         if let Some(instrument_markup) = markup_profile
@@ -99,10 +98,7 @@ fn compile_with_markup_profile(
             .get(&message.bid_ask.instrument_id)
         {
             if message.bid_ask.instrument_id == "EURUSD" {
-                to_print.push(format!(
-                    "EURUSD after GLOBAL profile. {:?}",
-                    message.bid_ask
-                ));
+                println!("EURUSD after GLOBAL profile. {:?}", message.bid_ask);
             }
 
             let model = map_bid_ask_to_sb_model_with_markup(
@@ -114,12 +110,7 @@ fn compile_with_markup_profile(
             if model.id == "EURUSD" {
                 let spread = ((model.ask - model.bid) * 100000.0) as i64;
 
-                if spread < 5 {
-                    for itm in to_print {
-                        println!("{}", itm);
-                    }
-                    println!("EURUSD after global apply. {:?}. Spread: {}", model, spread);
-                }
+                println!("EURUSD after global apply. {:?}. Spread: {}", model, spread);
             }
             result.push(model);
         } else {
