@@ -1,5 +1,5 @@
-use super::BridgeConnection;
-use crate::{models::PriceMixerBidAskModel, settings_model::SettingsReader};
+use super::{BridgeConnection, ToPublishQueue};
+use crate::settings_model::SettingsReader;
 use cfd_engine_sb_contracts::BidAskSbModel;
 use my_nosql_contracts::*;
 use service_sdk::{
@@ -12,7 +12,7 @@ use tokio::sync::Mutex;
 
 pub struct AppContext {
     pub bridge_connections: Mutex<HashMap<String, BridgeConnection>>,
-    pub bid_ask_to_publish: Mutex<Vec<PriceMixerBidAskModel>>,
+    pub bid_ask_to_publish: ToPublishQueue,
     pub publish_prices_loop: EventsLoopMutexWrapped<()>,
     pub instrument_sources_reader: Arc<MyNoSqlDataReaderTcp<InstrumentSourcesEntity>>,
     pub instrument_reader: Arc<MyNoSqlDataReaderTcp<TradingInstrumentNoSqlEntity>>,
@@ -27,7 +27,7 @@ impl AppContext {
         Self {
             bridge_connections: Mutex::new(HashMap::new()),
             publish_prices_loop: EventsLoopMutexWrapped::new("Output Mixer".to_string()),
-            bid_ask_to_publish: Mutex::new(Vec::new()),
+            bid_ask_to_publish: ToPublishQueue::new(),
             instrument_sources_reader: sc.get_ns_reader().await,
             instrument_reader: sc.get_ns_reader().await,
             price_bridges_settings: sc.get_ns_reader().await,

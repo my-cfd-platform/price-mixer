@@ -7,7 +7,7 @@ use settings_model::SettingsReader;
 mod app;
 mod background;
 mod bridge_config;
-mod models;
+//mod models;
 //mod nosql;
 mod operations;
 mod settings_model;

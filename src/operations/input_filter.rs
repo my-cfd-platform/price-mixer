@@ -1,7 +1,7 @@
 use my_nosql_contracts::{InstrumentSourcesEntity, TradingInstrumentNoSqlEntity};
 use prices_tcp_contracts::BidAskDataTcpModel;
 
-use crate::{app::AppContext, background::map_tcp_to_inner};
+use crate::app::AppContext;
 
 use std::sync::Arc;
 
@@ -35,13 +35,7 @@ pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &s
         return;
     }
 
-    let mut write_access = app.bid_ask_to_publish.lock().await;
-    write_access.push(map_tcp_to_inner(
-        bid_ask,
-        &instrument.base,
-        &instrument.quote,
-    ));
-    app.publish_prices_loop.send(());
+    app.bid_ask_to_publish.publish(instrument, bid_ask).await;
 }
 
 /*
