@@ -64,7 +64,8 @@ impl EventsLoopTick<()> for PublishPricesLoop {
 
                         for message in messages_to_publish {
                             if message.id == "EURUSD" {
-                                println!("EURUSD before GLOBAL profile. {:?}", message);
+                                println!("------");
+                                println!("EURUSD GLOBAL profile. {:?}", profile);
                             }
 
                             if let Some(profile) = profile.instruments.get(&message.id) {
