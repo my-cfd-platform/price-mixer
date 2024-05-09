@@ -91,7 +91,11 @@ impl EventsLoopTick<()> for PublishPricesLoop {
                                     );
 
                                     if model.id == "EURUSD" {
-                                        println!("EURUSD after global apply. {:?}", model);
+                                        println!(
+                                            "EURUSD after global apply. {:?}. Spread: {}",
+                                            model,
+                                            model.ask - model.bid * 100000.0
+                                        );
                                     }
                                     result.push(model);
                                 }
