@@ -16,7 +16,7 @@ pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &s
     else {
         return;
     };
-
+    /*
     let Some(instrument_src) = app
         .instrument_sources_reader
         .get_entity(
@@ -28,7 +28,7 @@ pub async fn process(app: &Arc<AppContext>, bid_ask: BidAskDataTcpModel, src: &s
         return;
     };
 
-    /*
+
     if !rust_extensions::str_utils::compare_strings_case_insensitive(
         instrument_src.source_id.as_str(),
         src,
