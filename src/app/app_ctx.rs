@@ -20,10 +20,17 @@ pub struct AppContext {
     pub markups: Arc<MyNoSqlDataReaderTcp<MarkupProfileNoSqlEntity>>,
     pub bid_ask_publisher: MyServiceBusPublisher<BidAskSbModel>,
     pub settings: Arc<SettingsReader>,
+    pub debug_asset: Option<String>,
 }
 
 impl AppContext {
     pub async fn new(settings: Arc<SettingsReader>, sc: &ServiceContext) -> Self {
+        let debug_asset = if let Ok(debug_asset) = std::env::var("DEBUG_ASSET") {
+            Some(debug_asset)
+        } else {
+            None
+        };
+
         Self {
             bridge_connections: Mutex::new(HashMap::new()),
             publish_prices_loop: EventsLoopMutexWrapped::new("Output Mixer".to_string()),
@@ -34,6 +41,7 @@ impl AppContext {
             markups: sc.get_ns_reader().await,
             bid_ask_publisher: sc.get_sb_publisher(false).await,
             settings,
+            debug_asset,
         }
     }
 }
